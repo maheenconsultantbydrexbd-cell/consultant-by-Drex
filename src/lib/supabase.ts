@@ -2,18 +2,72 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { CompanySettings, Customer, Invoice, InvoiceItem, PassportReceipt, Payment, PaymentStatus, User } from '../types';
 import { INITIAL_COMPANY_SETTINGS, INITIAL_CUSTOMERS, INITIAL_INVOICES, INITIAL_PASSPORT_RECEIPTS, INITIAL_USERS } from '../data/initialData';
 
-const supabaseUrl = ((import.meta as any).env?.VITE_SUPABASE_URL as string) || '';
-const supabaseAnonKey = ((import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string) || '';
+export const getSupabaseConfig = (): { url: string; key: string; isConfigured: boolean } => {
+  let url = '';
+  let key = '';
+  try {
+    const localUrl = localStorage.getItem('DREX_SUPABASE_URL');
+    const localKey = localStorage.getItem('DREX_SUPABASE_KEY');
+    if (localUrl && localUrl.trim()) url = localUrl.trim();
+    if (localKey && localKey.trim()) key = localKey.trim();
+  } catch {}
+
+  if (!url) {
+    const metaEnv = (import.meta as any).env || {};
+    url =
+      metaEnv.VITE_SUPABASE_URL ||
+      metaEnv.NEXT_PUBLIC_SUPABASE_URL ||
+      metaEnv.SUPABASE_URL ||
+      'https://zoaxnquifsvarilfetym.supabase.co';
+  }
+  if (!key) {
+    const metaEnv = (import.meta as any).env || {};
+    key =
+      metaEnv.VITE_SUPABASE_ANON_KEY ||
+      metaEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      metaEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      metaEnv.SUPABASE_ANON_KEY ||
+      metaEnv.SUPABASE_PUBLISHABLE_KEY ||
+      'sb_publishable_y3Pzns_J6PWUgTJXvfMTbA_GkxGFN39';
+  }
+
+  const isConfigured =
+    typeof url === 'string' &&
+    url.trim() !== '' &&
+    !url.includes('your-project-id') &&
+    typeof key === 'string' &&
+    key.trim() !== '' &&
+    !key.includes('your-anon-key');
+
+  return { url, key, isConfigured };
+};
+
+const activeConfig = getSupabaseConfig();
+const supabaseUrl = activeConfig.url;
+const supabaseAnonKey = activeConfig.key;
 
 export const isSupabaseConfigured = (): boolean => {
-  return (
-    typeof supabaseUrl === 'string' &&
-    supabaseUrl.trim() !== '' &&
-    !supabaseUrl.includes('your-project-id') &&
-    typeof supabaseAnonKey === 'string' &&
-    supabaseAnonKey.trim() !== '' &&
-    !supabaseAnonKey.includes('your-anon-key')
-  );
+  return getSupabaseConfig().isConfigured;
+};
+
+export const saveSupabaseCredentials = (url: string, key: string): void => {
+  try {
+    localStorage.setItem('DREX_SUPABASE_URL', url.trim());
+    localStorage.setItem('DREX_SUPABASE_KEY', key.trim());
+    window.location.reload();
+  } catch (e) {
+    console.error('Failed to save Supabase credentials to localStorage', e);
+  }
+};
+
+export const clearSupabaseCredentials = (): void => {
+  try {
+    localStorage.removeItem('DREX_SUPABASE_URL');
+    localStorage.removeItem('DREX_SUPABASE_KEY');
+    window.location.reload();
+  } catch (e) {
+    console.error('Failed to clear Supabase credentials', e);
+  }
 };
 
 // Create Supabase Client safely
@@ -984,12 +1038,22 @@ export async function dbSavePassportReceipt(
       passport_number: receipt.passport_number,
       mobile_number: receipt.mobile_number || null,
       email: receipt.email || null,
-      customer_id: receipt.customer_id || null,
+      customer_id:
+        receipt.customer_id &&
+        !receipt.customer_id.startsWith('cust-') &&
+        receipt.customer_id.length > 20
+          ? receipt.customer_id
+          : null,
       service_purpose: receipt.service_purpose,
       passport_received_date: receipt.passport_received_date,
       passport_status: receipt.passport_status,
       received_by: receipt.received_by,
-      received_by_id: receipt.received_by_id || null,
+      received_by_id:
+        receipt.received_by_id &&
+        !receipt.received_by_id.startsWith('user-') &&
+        receipt.received_by_id.length > 20
+          ? receipt.received_by_id
+          : null,
       notes: receipt.notes || null,
       returned_date: receipt.returned_date || null,
       returned_by: receipt.returned_by || null,

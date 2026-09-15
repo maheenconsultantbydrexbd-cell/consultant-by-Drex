@@ -235,115 +235,120 @@ RETURNS TEXT AS $$
 $$ LANGUAGE sql STABLE SECURITY DEFINER;
 
 -- Profiles Policies:
--- Any authenticated user can read profiles (to see colleagues' names and avatars)
+DROP POLICY IF EXISTS "Allow read profiles for authenticated users" ON public.profiles;
 CREATE POLICY "Allow read profiles for authenticated users"
   ON public.profiles FOR SELECT
   TO authenticated
   USING (true);
 
--- User can update their own profile; admins can update any profile
+DROP POLICY IF EXISTS "Allow update own profile or admin update" ON public.profiles;
 CREATE POLICY "Allow update own profile or admin update"
   ON public.profiles FOR UPDATE
   TO authenticated
   USING (id = auth.uid() OR public.current_user_role() = 'admin');
 
 -- Company Settings Policies:
--- Any authenticated employee or login visitor can read company settings
+DROP POLICY IF EXISTS "Allow read company settings" ON public.company_settings;
 CREATE POLICY "Allow read company settings"
   ON public.company_settings FOR SELECT
   TO authenticated, anon
   USING (true);
 
--- Only Admin can update company settings
+DROP POLICY IF EXISTS "Allow admin update company settings" ON public.company_settings;
 CREATE POLICY "Allow admin update company settings"
   ON public.company_settings FOR UPDATE
   TO authenticated
   USING (public.current_user_role() = 'admin');
 
 -- Customers Policies:
--- All authenticated users (Admin, Manager, Staff) can view customers
+DROP POLICY IF EXISTS "Allow read customers" ON public.customers;
 CREATE POLICY "Allow read customers"
   ON public.customers FOR SELECT
   TO authenticated
   USING (true);
 
--- All authenticated users can create & edit customers
+DROP POLICY IF EXISTS "Allow insert customers" ON public.customers;
 CREATE POLICY "Allow insert customers"
   ON public.customers FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow update customers" ON public.customers;
 CREATE POLICY "Allow update customers"
   ON public.customers FOR UPDATE
   TO authenticated
   USING (true);
 
--- Only Admin & Manager can delete customers
+DROP POLICY IF EXISTS "Allow delete customers" ON public.customers;
 CREATE POLICY "Allow delete customers"
   ON public.customers FOR DELETE
   TO authenticated
   USING (public.current_user_role() IN ('admin', 'manager'));
 
 -- Invoices Policies:
--- All authenticated users can view invoices
+DROP POLICY IF EXISTS "Allow read invoices" ON public.invoices;
 CREATE POLICY "Allow read invoices"
   ON public.invoices FOR SELECT
   TO authenticated
   USING (true);
 
--- All authenticated users can create invoices
+DROP POLICY IF EXISTS "Allow insert invoices" ON public.invoices;
 CREATE POLICY "Allow insert invoices"
   ON public.invoices FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
--- All authenticated users can update invoices
+DROP POLICY IF EXISTS "Allow update invoices" ON public.invoices;
 CREATE POLICY "Allow update invoices"
   ON public.invoices FOR UPDATE
   TO authenticated
   USING (true);
 
--- Only Admin & Manager can delete invoices
+DROP POLICY IF EXISTS "Allow delete invoices" ON public.invoices;
 CREATE POLICY "Allow delete invoices"
   ON public.invoices FOR DELETE
   TO authenticated
   USING (public.current_user_role() IN ('admin', 'manager'));
 
 -- Invoice Items Policies:
+DROP POLICY IF EXISTS "Allow read invoice items" ON public.invoice_items;
 CREATE POLICY "Allow read invoice items"
   ON public.invoice_items FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Allow insert invoice items" ON public.invoice_items;
 CREATE POLICY "Allow insert invoice items"
   ON public.invoice_items FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow update invoice items" ON public.invoice_items;
 CREATE POLICY "Allow update invoice items"
   ON public.invoice_items FOR UPDATE
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Allow delete invoice items" ON public.invoice_items;
 CREATE POLICY "Allow delete invoice items"
   ON public.invoice_items FOR DELETE
   TO authenticated
   USING (true);
 
 -- Payments Policies:
--- All authenticated users can read payments
+DROP POLICY IF EXISTS "Allow read payments" ON public.payments;
 CREATE POLICY "Allow read payments"
   ON public.payments FOR SELECT
   TO authenticated
   USING (true);
 
--- All authenticated users can record payments
+DROP POLICY IF EXISTS "Allow insert payments" ON public.payments;
 CREATE POLICY "Allow insert payments"
   ON public.payments FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
--- Only Admin & Manager can delete payments
+DROP POLICY IF EXISTS "Allow delete payments" ON public.payments;
 CREATE POLICY "Allow delete payments"
   ON public.payments FOR DELETE
   TO authenticated
@@ -360,7 +365,7 @@ CREATE TABLE IF NOT EXISTS public.passport_receipts (
   passport_number TEXT NOT NULL,
   mobile_number TEXT,
   email TEXT,
-  customer_id TEXT REFERENCES public.customers(id) ON DELETE SET NULL,
+  customer_id UUID REFERENCES public.customers(id) ON DELETE SET NULL,
   service_purpose TEXT NOT NULL DEFAULT 'India Visa Processing for Portugal Workpermit',
   passport_received_date DATE NOT NULL DEFAULT CURRENT_DATE,
   passport_status TEXT NOT NULL CHECK (passport_status IN ('Received', 'With Office', 'Returned')) DEFAULT 'With Office',
@@ -375,29 +380,51 @@ CREATE TABLE IF NOT EXISTS public.passport_receipts (
 
 ALTER TABLE public.passport_receipts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow read passport_receipts" ON public.passport_receipts;
 CREATE POLICY "Allow read passport_receipts"
   ON public.passport_receipts FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Allow insert passport_receipts" ON public.passport_receipts;
 CREATE POLICY "Allow insert passport_receipts"
   ON public.passport_receipts FOR INSERT
   TO authenticated
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow update passport_receipts" ON public.passport_receipts;
 CREATE POLICY "Allow update passport_receipts"
   ON public.passport_receipts FOR UPDATE
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Allow delete passport_receipts" ON public.passport_receipts;
 CREATE POLICY "Allow delete passport_receipts"
   ON public.passport_receipts FOR DELETE
   TO authenticated
   USING (public.current_user_role() IN ('admin', 'manager'));
 
--- 13. Enable Realtime Publications for all collaborative tables
-ALTER PUBLICATION supabase_realtime ADD TABLE public.invoices;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.customers;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.payments;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.company_settings;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.passport_receipts;
+-- 13. Enable Realtime Publications for all collaborative tables (safe against existing tables)
+DO $$
+BEGIN
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.invoices;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.customers;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.payments;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.company_settings;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.passport_receipts;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+END $$;
