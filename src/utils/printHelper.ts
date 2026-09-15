@@ -218,12 +218,11 @@ export function printInvoiceDocument(
       <div style="padding: 28px 34px 20px 34px; margin-top: auto; box-sizing: border-box;">
         <div style="display: flex; justify-content: flex-end; align-items: flex-end; margin-bottom: 18px;">
           <!-- Account Manager Signature -->
-          <div style="display: flex; flex-direction: column; align-items: center; width: 190px;">
-            <div style="width: 100%; border-top: 2px solid #0f172a; margin-bottom: 5px;"></div>
-            <div style="font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; color: #0f172a;">
+          <div style="display: flex; flex-direction: column; align-items: center; min-width: 190px;">
+            <div style="width: 100%; border-top: 2px solid #0f172a; margin-bottom: 6px;"></div>
+            <div style="font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; color: #0f172a; white-space: nowrap; text-align: center;">
               ${settings.account_manager_name || 'Account Manager'}
             </div>
-            <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Authorized Signature</div>
           </div>
         </div>
 

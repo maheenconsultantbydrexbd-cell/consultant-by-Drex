@@ -371,12 +371,11 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
       <div className="px-8 pb-8 pt-10 mt-auto">
         <div className="flex justify-end items-end mb-4">
           {/* Right: Account Manager Signature */}
-          <div className="flex flex-col items-center">
-            <div className="w-48 border-t-2 border-slate-900 mb-1.5" />
-            <span className="text-sm font-bold text-slate-900 tracking-tight font-display">
+          <div className="flex flex-col items-center min-w-[190px]">
+            <div className="w-48 border-t-2 border-slate-900 mb-2" />
+            <span className="text-sm font-bold text-slate-900 tracking-tight font-display whitespace-nowrap text-center">
               {settings.account_manager_name || 'Account Manager'}
             </span>
-            <span className="text-[10px] text-slate-400 font-medium">Authorized Signature</span>
           </div>
         </div>
 
