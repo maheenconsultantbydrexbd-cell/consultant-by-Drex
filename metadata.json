@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix Invoice Management System",
+  "description": "D’Rex Suite — Smart Business Management, Simplified. Professional invoice management, real-time A4 preview, PDF export, print support, and customer directory.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
