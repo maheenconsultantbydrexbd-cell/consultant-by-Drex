@@ -19,11 +19,8 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
   printMode = false,
   currentUser,
 }) => {
-  // Creator Name Resolution
-  const creatorName =
-    (invoice.created_by && invoice.created_by.trim()) ||
-    (currentUser?.name && currentUser.name.trim()) ||
-    'Authorized Officer';
+  // Creator Name Resolution - Always displays Consultant By D'Rex
+  const creatorName = "Consultant By D'Rex";
 
   // Maintain clean professional row balance
   const displayItems = [...invoice.items];

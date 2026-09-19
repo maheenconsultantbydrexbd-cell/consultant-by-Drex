@@ -14,6 +14,7 @@ import {
   KeyRound,
   Link,
   Lock,
+  RefreshCw,
   Server,
   Sparkles,
   Trash2,
@@ -21,7 +22,15 @@ import {
   X,
 } from 'lucide-react';
 
-export const SupabaseSetupBanner: React.FC = () => {
+interface SupabaseSetupBannerProps {
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+}
+
+export const SupabaseSetupBanner: React.FC<SupabaseSetupBannerProps> = ({
+  onRefresh,
+  isRefreshing = false,
+}) => {
   const isConfigured = isSupabaseConfigured();
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -116,7 +125,20 @@ export const SupabaseSetupBanner: React.FC = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              title="Sync latest data from all team members"
+              className="text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition-all bg-slate-800 text-slate-200 hover:text-white hover:bg-slate-700 border border-slate-700 disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin text-emerald-400' : ''}`} />
+              <span>{isRefreshing ? 'Syncing...' : 'Sync Now'}</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => setShowModal(true)}

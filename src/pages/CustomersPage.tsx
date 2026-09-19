@@ -156,97 +156,120 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
         </div>
       </div>
 
-      {/* Customer Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredCustomers.map((c) => (
-          <div
-            key={c.id}
-            className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
-          >
-            <div className="space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#0F3B2C] font-bold text-sm flex items-center justify-center border border-emerald-100 flex-shrink-0">
-                    {c.name.substring(0, 2).toUpperCase()}
+      {/* Customer Cards Grid or Empty State */}
+      {filteredCustomers.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredCustomers.map((c) => (
+            <div
+              key={c.id}
+              className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#0F3B2C] font-bold text-sm flex items-center justify-center border border-emerald-100 flex-shrink-0">
+                      {c.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="overflow-hidden">
+                      <h3 className="font-bold text-slate-900 text-sm truncate">{c.name}</h3>
+                      {c.company_name && (
+                        <p className="text-xs text-slate-500 truncate flex items-center gap-1">
+                          <Building2 className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                          <span>{c.company_name}</span>
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="overflow-hidden">
-                    <h3 className="font-bold text-slate-900 text-sm truncate">{c.name}</h3>
-                    {c.company_name && (
-                      <p className="text-xs text-slate-500 truncate flex items-center gap-1">
-                        <Building2 className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                        <span>{c.company_name}</span>
-                      </p>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(c)}
+                      className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                      title="Edit client"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
+                    {currentUser.role !== 'staff' && (
+                      <button
+                        type="button"
+                        onClick={() => onDeleteCustomer(c.id)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                        title="Delete client (Admin & Manager only)"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => openEditModal(c)}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                    title="Edit client"
-                  >
-                    <Edit className="w-3.5 h-3.5" />
-                  </button>
-                  {currentUser.role !== 'staff' && (
-                    <button
-                      type="button"
-                      onClick={() => onDeleteCustomer(c.id)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                      title="Delete client (Admin & Manager only)"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                {/* Details */}
+                <div className="space-y-1.5 pt-2 text-xs text-slate-600 border-t border-slate-100">
+                  {c.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      <span>{c.phone}</span>
+                    </div>
+                  )}
+                  {c.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                      <span className="truncate">{c.email}</span>
+                    </div>
+                  )}
+                  {c.address && (
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 mt-0.5" />
+                      <span className="line-clamp-1">{c.address}</span>
+                    </div>
                   )}
                 </div>
               </div>
 
-              {/* Details */}
-              <div className="space-y-1.5 pt-2 text-xs text-slate-600 border-t border-slate-100">
-                {c.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                    <span>{c.phone}</span>
-                  </div>
-                )}
-                {c.email && (
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                    <span className="truncate">{c.email}</span>
-                  </div>
-                )}
-                {c.address && (
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 mt-0.5" />
-                    <span className="line-clamp-1">{c.address}</span>
-                  </div>
-                )}
+              {/* Bottom Stats & Quick Action */}
+              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Invoiced</span>
+                  <span className="text-xs font-extrabold text-[#0F3B2C]">
+                    {formatCurrency(c.total_spent || 0, currencySymbol)}
+                  </span>
+                  <span className="text-[10px] text-slate-500 ml-1">({c.total_invoices} invoices)</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => onCreateInvoiceForCustomer(c)}
+                  className="px-3 py-1.5 bg-[#7EA64B] hover:bg-[#8ebb54] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-colors"
+                >
+                  <FilePlus className="w-3.5 h-3.5" />
+                  <span>Invoice</span>
+                </button>
               </div>
             </div>
-
-            {/* Bottom Stats & Quick Action */}
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Invoiced</span>
-                <span className="text-xs font-extrabold text-[#0F3B2C]">
-                  {formatCurrency(c.total_spent || 0, currencySymbol)}
-                </span>
-                <span className="text-[10px] text-slate-500 ml-1">({c.total_invoices} invoices)</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => onCreateInvoiceForCustomer(c)}
-                className="px-3 py-1.5 bg-[#7EA64B] hover:bg-[#8ebb54] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-colors"
-              >
-                <FilePlus className="w-3.5 h-3.5" />
-                <span>Invoice</span>
-              </button>
-            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 text-[#0F3B2C] flex items-center justify-center mb-3">
+            <Users className="w-7 h-7 text-[#7EA64B]" />
           </div>
-        ))}
-      </div>
+          <h3 className="text-base font-bold text-slate-800 font-display">No Customers Found</h3>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            {searchTerm
+              ? 'No client profiles match your current search query.'
+              : 'Start by adding your first customer or client profile.'}
+          </p>
+          <button
+            type="button"
+            onClick={openAddModal}
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#0F3B2C] text-white text-xs font-bold rounded-xl shadow-sm hover:bg-[#154d3a] transition-all"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Add First Customer</span>
+          </button>
+        </div>
+      )}
+
 
       {/* Add / Edit Customer Modal */}
       {isModalOpen && (
@@ -266,7 +289,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Mr. Rafiqul Islam"
+                  placeholder="Enter client or customer name"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F3B2C]"
                 />
               </div>
@@ -279,10 +302,11 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                   type="text"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="e.g. Apex Horizon Technologies Ltd."
+                  placeholder="Enter company or organization"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F3B2C]"
                 />
               </div>
+
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">

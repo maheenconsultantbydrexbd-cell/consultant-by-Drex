@@ -59,6 +59,16 @@ export default function App() {
   });
 
   const [customers, setCustomers] = useState<Customer[]>(() => {
+    // Check if user has updated to clean state
+    const isCleaned = localStorage.getItem('drex_demo_cleaned_v2');
+    if (!isCleaned) {
+      localStorage.setItem('drex_demo_cleaned_v2', 'true');
+      localStorage.removeItem('drex_customers');
+      localStorage.removeItem('drex_invoices');
+      localStorage.removeItem('drex_passport_receipts');
+      localStorage.removeItem('drex_passport_receipts_v2');
+      return [];
+    }
     const saved = localStorage.getItem('drex_customers');
     return saved ? JSON.parse(saved) : INITIAL_CUSTOMERS;
   });
@@ -72,6 +82,7 @@ export default function App() {
     const saved = localStorage.getItem('drex_passport_receipts');
     return saved ? JSON.parse(saved) : INITIAL_PASSPORT_RECEIPTS;
   });
+
 
   const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
 
@@ -118,9 +129,10 @@ export default function App() {
       if (fetchedSettings) {
         setSettings(fetchedSettings);
       }
-      if (fetchedCustomers && fetchedCustomers.length > 0) {
+      if (fetchedCustomers) {
         setCustomers(fetchedCustomers);
       }
+
       if (fetchedInvoices) {
         setInvoices(fetchedInvoices);
       }
@@ -231,6 +243,8 @@ export default function App() {
     setCurrentUser(user);
     setIsAuthenticated(true);
     showToast('success', `Signed in as ${user.name}`, `${user.role.toUpperCase()} privileges active`);
+    // Immediately fetch latest shared central database records
+    loadDatabaseData();
   };
 
   const handleLogout = async () => {
@@ -538,7 +552,10 @@ export default function App() {
       {/* Main App Content View Area */}
       <main className="flex-1 overflow-y-auto min-h-screen flex flex-col">
         {/* Supabase Central DB Connection Status Banner */}
-        <SupabaseSetupBanner />
+        <SupabaseSetupBanner
+          onRefresh={loadDatabaseData}
+          isRefreshing={isLoadingData}
+        />
 
         <div className="flex-1">
           {activeTab === 'dashboard' && (
